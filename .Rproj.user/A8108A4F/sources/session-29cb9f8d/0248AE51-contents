@@ -13,6 +13,17 @@ library(ggbeeswarm)
 
 ui <- fluidPage(
   tags$head(
+    tags$style(
+      HTML(
+        "
+        body {
+          background-color: #A39E9E; /* Change to the desired background color */
+        }
+        "
+      )
+    )
+  ),  
+  tags$head(
     tags$style(HTML("
       /* Define a custom class for text with a colored box */
       .boxed-text {
@@ -55,6 +66,7 @@ ui <- fluidPage(
       .sidebar-border {
         border: 1px solid #000000; /* Change color and width as needed */
         padding: 10px; /* Adjust padding if necessary */
+        background-color: #FFFFFF;
         margin-left: 5px;
       }
       "
@@ -69,6 +81,9 @@ ui <- fluidPage(
         margin-left: -10px; /* Negative margin to overlap the tab content */
         margin-right: -17px;
       }
+      .tab-border strong {
+        font-weight: bold; /* Apply bold font to the text */
+      }
       "
     )
   ),
@@ -79,7 +94,11 @@ ui <- fluidPage(
   h4(strong("Analysis of Post-Mortem Huntington’s Disease Data")),
   
   h5(class = "underlined-text","Credit:"),
-  p("Labadorf A, Hoss AG, Lagomarsino V, Latourelle JC et al. RNA Sequence Analysis of Human Huntington Disease Brain Reveals an Extensive Increase in Inflammatory and Developmental Gene Expression. PLoS One 2015;10(12):e0143563. PMID: 26636579"),
+  p(tags$a(
+    href = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4670106/",
+    "Labadorf A, Hoss AG, Lagomarsino V, Latourelle JC et al. RNA Sequence Analysis of Human Huntington Disease Brain Reveals an Extensive Increase in Inflammatory and Developmental Gene Expression. PLoS One 2015;10(12):e0143563. PMID: 26636579"
+    )
+  ),
   p(
     "Dataset: ",
     tags$a(
@@ -89,9 +108,9 @@ ui <- fluidPage(
   ),
   ),
   div(
-    style = "border: 1px solid #000000; border-radius: 5px;",
+    style = "border: 2px solid #000000; border-radius: 5px;background-color: #F5F5F5;",
   tabsetPanel(
-    tabPanel(title = tags$span(class = "tab-border","Sample Metadata"),
+    tabPanel(title = tags$span(class = "tab-border",tags$strong("Sample Metadata")),
              sidebarLayout(
                sidebarPanel(width = 3,
                             tags$head(
@@ -104,13 +123,13 @@ ui <- fluidPage(
                mainPanel(
                  
                  tabsetPanel(
-                   tabPanel(title = tags$span(class = "tab-border","Summary"),class="tab-border",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Summary")),class="tab-border",
                            div(DT::dataTableOutput("sample_summary"),style="width:100%;")
                    ),
-                   tabPanel(title = tags$span(class = "tab-border","Metadata"),class="tab-border",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Metadata")),class="tab-border",
                             div(DT::dataTableOutput("sample_table"), style = "font-size:80%; width: 100%;")
                    ),
-                   tabPanel(title = tags$span(class = "tab-border","Violin Plot"),
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Violin Plot")),
                             sidebarPanel(
                                           selectInput(inputId = "sample_x", label = "Change X Variable",
                                                       choices = c("RNA integrity number", "Post mortem interval", "mRNA-seq reads", "Age of death"),
@@ -130,7 +149,7 @@ ui <- fluidPage(
              )
     ),  
     
-    tabPanel(title = tags$span(class = "tab-border","Counts Matrix"),
+    tabPanel(title = tags$span(class = "tab-border",tags$strong("Counts Matrix")),
              sidebarLayout(
                sidebarPanel( width = 3,
                              #input count matrix
@@ -166,7 +185,7 @@ ui <- fluidPage(
                )
              )
     ),
-    tabPanel(title = tags$span(class = "tab-border","Differential Expression Analysis"),
+    tabPanel(title = tags$span(class = "tab-border",tags$strong("Differential Expression Analysis")),
              sidebarLayout(
                sidebarPanel(width = 3,
                             #input count matrix
@@ -205,7 +224,7 @@ ui <- fluidPage(
                )
              )
     ),
-    tabPanel(title = tags$span(class = "tab-border","GSEA"),
+    tabPanel(title = tags$span(class = "tab-border",tags$strong("GSEA")),
              # Use DGE results to compute gene set enrichment analysis with fgsea
              sidebarLayout(
                sidebarPanel(width = 3,
