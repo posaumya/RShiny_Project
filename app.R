@@ -48,6 +48,7 @@ ui <- fluidPage(
         margin: 0 auto; /* Center align the box */
         text-align: center; /* Center align text */
         line-height: 1; /* Adjust line height */
+        margin-top: 10px;
         margin-bottom: 10px;
       }
     "))
@@ -87,25 +88,25 @@ ui <- fluidPage(
       "
     )
   ),
+  tags$head(
+    tags$style(HTML("
+      /* Define a custom class for text with a colored box */
+      .credit-text {
+        border: 2px solid #000; /* Set border properties */
+        padding: 15px; /* Add padding */
+        background-color: #f0f0f0; /* Set background color */
+        border-radius: 5px; /* Add border radius for rounded corners */
+        line-height: 1; /* Adjust line height */
+        margin-top: 10px;
+        margin-bottom: 10px; /* Add space below the text */
+      }
+    "))
+  ),
   div(class = "title-text",
   titlePanel(strong("BF591 Final Project")),
   ),
   div(class = "boxed-text",
   h4(strong("Analysis of Post-Mortem Huntington’s Disease Data")),
-  
-  h5(class = "underlined-text","Credit:"),
-  p(tags$a(
-    href = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4670106/",
-    "Labadorf A, Hoss AG, Lagomarsino V, Latourelle JC et al. RNA Sequence Analysis of Human Huntington Disease Brain Reveals an Extensive Increase in Inflammatory and Developmental Gene Expression. PLoS One 2015;10(12):e0143563. PMID: 26636579"
-    )
-  ),
-  p(
-    "Dataset: ",
-    tags$a(
-      href = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64810",
-      "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64810"
-    )
-  ),
   ),
   div(
     style = "border: 2px solid #000000; border-radius: 5px;background-color: #F5F5F5;",
@@ -137,7 +138,10 @@ ui <- fluidPage(
                                           selectInput(inputId = "sample_y", label = "Change Y Variable",
                                                       choices = c("RNA integrity number", "Post mortem interval", "mRNA-seq reads", "Age of death"),
                                                       selected = "mRNA-seq reads"),
-                                            submitButton(text = "Plot",icon = icon("chart-area")),
+                                          div(
+                                            submitButton(text = "Plot", icon = icon("chart-area")),
+                                            style = "width: 100%; text-align: center;"  
+                                          ),
                                           class = "sidebar-border",
                                        ),  
                             mainPanel(
@@ -152,30 +156,43 @@ ui <- fluidPage(
     tabPanel(title = tags$span(class = "tab-border",tags$strong("Counts Matrix")),
              sidebarLayout(
                sidebarPanel( width = 3,
+                             tags$head(
+                               tags$style(".btn-file {background-color:#829CD0;}.progress-bar{color:black;background-color:#A39E9E;}")),
                              #input count matrix
                              fileInput(inputId = "count_file", label = "Upload Counts Data", accept = ".csv"),
                              # Add slider inputs
-                             sliderInput(inputId = "slid_var",label = "Choose a threshold value to include genes that have at least X percentile of variance", min = 1, max = 100, value = 80, step = 1),
-                             sliderInput(inputId = "slid_zero",label = "Choose a threshold value to include genes that have at least X samples with non-zero values", min = 0, max = 69, value = 60, step = 1),
-                             submitButton(text = "Submit",icon = icon("file"))
+                             tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: #829CD0; color: black}")),
+                             sliderInput(inputId = "slid_var",label = "Choose gene percentile of variance", min = 0, max = 100, value = 65, step = 1),
+                             tags$style(HTML(".js-irs-1 .irs-single, .js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {background: #829CD0; color: black}")),
+                             sliderInput(inputId = "slid_zero",label = "Choose genes that have samples with non-zero values", min = 0, max = 69, value = 58, step = 1),
+                             class="sidebar-border",
+                             div(
+                               submitButton(text = "Filter", icon = icon("filter")),
+                               style = "width: 100%; text-align: center;"  
+                             )
                ),
                
                # Show a plot of the generated distribution
                mainPanel(
                  tabsetPanel(
-                   tabPanel(title = "Filter Results",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Filtered Data")),class="tab-border",
                             tableOutput("filter_count")
                    ),
-                   tabPanel(title = "Diagnostic plots",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Scatter Plot")),class="tab-border",
                             plotOutput("count_scatter")
                    ),
-                   tabPanel(title = "Heatmap",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Heatmap")),class="tab-border",
                             plotOutput("clus_heatmap",width = "80%", height = "500px")
                    ),
-                   tabPanel(title = "PCA",
-                            sidebarPanel(width = 3,
-                                         sliderInput("top_PC",label = "Select the TOP PCs you want to plot", min = 3, max = 45, value =8, step = 1),
-                                         submitButton(text = "Submit",icon = icon("chart-line"))
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("PCA")),
+                            sidebarPanel(
+                                        tags$style(HTML(".js-irs-2 .irs-single, .js-irs-2 .irs-bar-edge, .js-irs-2 .irs-bar {background: #829CD0; color: black}")),
+                                         sliderInput("top_PC",label = "Choose number of top PCs", min = 2, max = 20, value = 5, step = 1),
+                                        div(
+                                          submitButton(text = "Plot", icon = icon("chart-gantt")),
+                                          style = "width: 100%; text-align: center;"  
+                                        ),
+                                         class="sidebar-border"
                             ),
                             mainPanel(
                               plotOutput("pca_plot",width = "120%", height = "400px")
@@ -185,37 +202,43 @@ ui <- fluidPage(
                )
              )
     ),
-    tabPanel(title = tags$span(class = "tab-border",tags$strong("Differential Expression Analysis")),
+    tabPanel(title = tags$span(class = "tab-border",tags$strong("Differential Expression")),
              sidebarLayout(
                sidebarPanel(width = 3,
                             #input count matrix
-                            fileInput(inputId = "deseq_file", label = "Upload Counts Matrix", accept = ".csv"),
+                            fileInput(inputId = "deseq_file", label = "Upload DE File", accept = ".csv"),
+                            class="sidebar-border"
                ),
                # Show a plot of the generated distribution
                mainPanel(
                  tabsetPanel(
-                   tabPanel(title = "DE Input File",
-                            div(DT::dataTableOutput("DE_summary"), style = "font-size:80%; width: 30%;")
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Metadata")),class="tab-border",
+                            div(DT::dataTableOutput("DE_summary"), style = "font-size:80%; width: 100%;")
                    ),
-                   tabPanel(title = "DE Results",
-                            sidebarPanel(width = 3,
-                                         radioButtons(inputId = "x_axis", label = "Select a variable on X axis", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "log2FoldChange"), #NULL ),
-                                         radioButtons(inputId = "y_axis", label = "Select a variable on Y axis", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "padj"),#NULL),
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Plot")),
+                            sidebarPanel(
+                                         radioButtons(inputId = "x_axis", label = "Choose X-axis variable", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "log2FoldChange"), #NULL ),
+                                         radioButtons(inputId = "y_axis", label = "Choose Y-axis variable", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "padj"),#NULL),
                                          # Add color inputs
-                                         colourInput(inputId = "base", label = "Choose color 1", value = "#07B377"),
-                                         colourInput(inputId = "highlight", label = "Choose color 2", value = "#F5E149"),
+                                         colourInput(inputId = "base", label = "Choose color 1", value = "#60BD56"),
+                                         colourInput(inputId = "highlight", label = "Choose color 2", value = "#BA1AE5"),
                                          # Add slider inputs
-                                         sliderInput(inputId = "padj_slider",label = "Choose a padj value as threshold", min = -35, max = 0, value = -8, step = 1),
+                                         tags$style(HTML(".js-irs-3 .irs-single, .js-irs-3 .irs-bar-edge, .js-irs-3 .irs-bar {background: #829CD0; color: black}")),
+                                         sliderInput(inputId = "padj_slider",label = "Choose a padj value as threshold", min = -35, max = 0, value = -5, step = 1),
                                          #Add a submit buttom
-                                         submitButton(text = "plot",icon = icon("folder")) 
+                                         div(
+                                           submitButton(text = "Plot", icon = icon("chart-simple")),
+                                           style = "width: 100%; text-align: center;"  
+                                         ),
+                                         class="sidebar-border"
                             ),
                             mainPanel(
                               tabsetPanel(
-                                tabPanel(title = "Volcano plot",
+                                tabPanel(title = tags$span(class = "tab-border",tags$strong("Volcano Plot")),
                                          plotOutput("volcano",width = "110%", height = "500px")
                                 ),
-                                tabPanel(title = "Padj filtered table",
-                                         div(DT::dataTableOutput("volcano_table"), style = "font-size:80%; width: 30%;")
+                                tabPanel(title = tags$span(class = "tab-border",tags$strong("Filtered Table")),class="tab-border",
+                                         div(DT::dataTableOutput("volcano_table"), style = "font-size:80%; width: 100%;")
                                 )
                               )
                             )
@@ -277,7 +300,23 @@ ui <- fluidPage(
              )
     )
   )
-))
+ ),
+ div(class="credit-text",
+ h5(class = "underlined-text","Credit:"),
+ p(tags$a(
+   href = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4670106/",
+   "Labadorf A, Hoss AG, Lagomarsino V, Latourelle JC et al. RNA Sequence Analysis of Human Huntington Disease Brain Reveals an Extensive Increase in Inflammatory and Developmental Gene Expression. PLoS One 2015;10(12):e0143563. PMID: 26636579"
+ )
+ ),
+ p(
+   "GEO Dataset: ",
+   tags$a(
+     href = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64810",
+     "GSE64810 Data"
+   )
+  )
+ )
+)
 
 # Define server logic required to draw a violin plot
 server <- function(input, output, session) {
@@ -379,11 +418,12 @@ server <- function(input, output, session) {
     new_tib <- new_tib%>%  
       mutate(determine = ifelse(variance >= xPercentile, "Pass", "Fail")) %>%
       ggplot(aes(x= rank, y= variance, color=determine)) +
-      geom_point() +
-      scale_color_manual(values = c("Fail" = "lightblue", "Pass" = "darkblue")) +
+      geom_point(shape = 21, color = "black", size=2, aes(fill = determine)) +
+      scale_color_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
+      scale_fill_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
       geom_smooth() +
       theme_classic()+
-      labs(title= "Median Count vs Variance", x="Rank(Median)", y = "Variance", color="Filter") +
+      labs(title= "Median Count vs Variance", x="Ranked Median", y = "Variance", color="Filter") +
       scale_y_log10()
     return(new_tib)
   }
@@ -394,11 +434,12 @@ server <- function(input, output, session) {
       mutate(determine = ifelse(non_zeros >= pass_filter2, "Pass", "Fail"),
              num_zeros = ncol(data)-non_zeros) %>%
       ggplot(aes(x= rank, y= num_zeros, color=determine)) +
-      geom_point() +
-      scale_color_manual(values = c("Fail" = "lightblue", "Pass" = "darkblue")) +
+      geom_point(shape = 21, color = "black", size=2, aes(fill = determine)) +
+      scale_color_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
+      scale_fill_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
       geom_smooth() +
       theme_classic()+
-      labs(title= "Median Count vs Number of zeros", x="Rank(Median)", y = "Number of zeros", color="Filter")
+      labs(title= "Median Count vs Number of Zeros", x="Ranked Median", y = "Number of Zeros", color="Filter")
     return(new_tib)
   }
   
@@ -431,7 +472,7 @@ server <- function(input, output, session) {
     biplot$Diagnosis <- factor(ifelse(biplot$Diagnosis == "normal" & seq_len(nrow(biplot)) <= 49, "normal", "Huntington's Disease"))
     biplot_select <- dplyr::select(biplot, 1:N+1, 71)
     # Define a custom color palette with repeated colors
-    my_colors <- rep(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999", "#66C2A5"), 2)
+    my_colors <- rep(c("#FF9A13", "#FF4BBB", "#B7FF3F", "#1E82E7", "#E7441E", "#EAEA5A", "#AC0056", "#9B785B", "#66F1BE", "#0015FF"), 2)
     
     top_var <- head(summary(pca_results)$importance[2, ], N)
     top_var_percent <- 100 * top_var
@@ -441,10 +482,11 @@ server <- function(input, output, session) {
     beeswarm_plot <- biplot_select %>%
       pivot_longer(cols = PC1:N, names_to = "PC", values_to = "value") %>%
       ggplot(aes(x = factor(PC, levels = paste0("PC", 1:N)), y = value, color = PC)) +
-      geom_quasirandom(size = 0.6, width = .3) +
+      geom_beeswarm()+
+      geom_beeswarm(shape=21,color="black")+
       scale_color_manual(values = my_colors, labels = pcs) +
       theme_classic() +
-      labs(x = "PCs", y = "Values", title = "Distribution of Values across Multiple PCs ")
+      labs(x = "Principal Components", y = "Values")
     beeswarm_plot
   }
   #Read in DESeq data
@@ -456,34 +498,44 @@ server <- function(input, output, session) {
   })
   
   #Generate Volcano plot 
-  volcano_plot <- function(dataf, x_name, y_name, slider, color1, color2) {
-    # modify the dataframe
-    #y_name <- gsub('"','',y_name)
-    df <- dplyr::mutate(dataf, new_y_name = -log10(!!sym(y_name))) %>%
-      dplyr::mutate(status = dplyr::case_when(padj < 10^(slider) ~ "TRUE",
-                                              padj >= 10^(slider) ~ "FALSE",
-                                              TRUE ~ "NA"))
-    # specify color based on the slider value
-    df$colors <- ifelse(df$status == "FALSE", color1, color2)
-    #plotting volcano plot
-    volcano <- ggplot(df, aes(x = !!sym(x_name), y = new_y_name,color = colors)) + 
-      geom_point(size = 1) +
-      scale_color_manual(values = c(color1, color2,"grey"),
-                         labels = c("FALSE", "TRUE", "NA")) +
-      labs(x = x_name, y = paste0("-log10(", y_name, ")"),color = paste0( y_name, "< 10^",slider )) +
-      theme_bw()+
-      theme(legend.position = "bottom") # move legend to bottom of plot
+  volcano_plot <- function(dataf, x_axis, y_axis, slider, base, highlight) {
+    slider_value <- 10^slider
     
-    return(volcano)
+    # Convert columns to numeric and handle NA values
+    dataf[[x_axis]] <- as.numeric(dataf[[x_axis]])
+    dataf[[y_axis]] <- -log10(as.numeric(dataf[[y_axis]]))
+    
+    
+    # Implement a simple volcano plot using ggplot2
+    ggplot(dataf, aes(x = !!rlang::sym(x_axis), y = !!rlang::sym(y_axis), color = color_by_condition)) +
+      geom_point(size = 2) +
+      labs(
+        x = x_axis,
+        y = y_axis,
+        color = paste("padj <", slider_value)  # Set legend title
+      ) +
+      scale_color_manual(name=paste("padj <", slider_value),values = c("FALSE" = base, "TRUE" = highlight, "NA" = "grey")) +
+      theme_minimal() +
+      theme(legend.position = "bottom")
   }
   
   #Generate padj filtered table in DE tab
   draw_table <- function(dataf, slider) {
-    filtered_df <-dplyr::filter(dataf, padj < 10^(slider))
-    filtered_df <- dplyr::rename(filtered_df)
-    formatted_df <- dplyr::mutate(filtered_df, pvalue = formatC(ifelse(is.na(pvalue), 0, pvalue), format = "e"),
-                                  padj = formatC(ifelse(is.na(padj), 0, padj), format = "e"))
-    return(formatted_df)
+    slider_value <- 10^slider
+    
+    # Filter data based on condition
+    filtered_data <- dataf
+    
+    # Create a reactive variable for color by condition
+    filtered_data$color_by_condition <- ifelse(filtered_data$padj < slider_value, "TRUE", "FALSE")
+    filtered_data$color_by_condition[is.na(filtered_data$padj)] <- "NA"
+    
+    # Format p-value and p-adjusted columns with more digits
+    filtered_data$pvalue <- formatC(filtered_data$pvalue, format = "e", digits = 5)
+    filtered_data$padj <- formatC(filtered_data$padj, format = "e", digits = 5)
+    
+    # Return the filtered data
+    return(filtered_data)
   }
   #Read in fgsea data
   fgsea_data <- reactive({
@@ -578,7 +630,12 @@ server <- function(input, output, session) {
     if(is.null(dataf))
       return(null)
     result_tab <- filter_table(dataf, input$slid_var ,input$slid_zero)
-    result_tab
+    trans_result <- pivot_wider(
+      data = result_tab,
+      names_from = metric,
+      values_from = value
+    )
+    trans_result
   }) 
   
   #output count scatter plot
@@ -616,26 +673,46 @@ server <- function(input, output, session) {
     if(is.null(dataf))
       return(null)
     dataf
-  }) 
+  }, options = list(ordering = TRUE,
+                    scrollX = TRUE  # Enable horizontal scrolling)
+  )) 
+  
+  
+  filtered_data <- reactive({
+    slider_value <- 10^input$padj_slider
+    dataf <- deseq_data()
+    return(draw_table(dataf, input$padj_slider))
+  })
   
   #output DE volcano plot
   output$volcano <- renderPlot({
-    dataf <- deseq_data()
-    if(is.null(dataf))
-      return(null)
-    plot <- volcano_plot(dataf, input$x_axis, input$y_axis, input$padj_slider, input$base, input$highlight)
-    #ggplotly(plot) # turn the static plot into interactive but correspoding to use use plotlyOutput() and renderPlotly()
-    plot
+    input$padj_slider
+    isolate({
+      volcano_plot(
+        filtered_data(),
+        input$x_axis,
+        input$y_axis,
+        input$padj_slider,
+        input$base,
+        input$highlight
+      )
+    })
   }) 
   
   # output the padj filtered table in DE tab
   output$volcano_table <- DT::renderDataTable({
+    input$padj_slider
     dataf <- deseq_data()
-    if(is.null(dataf))
-      return(null)
-    result_tab <- draw_table(dataf, input$padj_slider)
-    result_tab
-  }) 
+    isolate({
+      filtered_data <- draw_table(dataf, input$padj_slider)
+      # Display only rows where color_by_condition is TRUE
+      filtered_data <- filtered_data[filtered_data$color_by_condition == "TRUE", ]
+      # Remove the unnecessary column before displaying the table
+      filtered_data[, !(colnames(filtered_data) %in% c("color_by_condition"))]
+    })
+  }, options = list(ordering = TRUE,
+                    scrollX = TRUE  # Enable horizontal scrolling)
+  )) 
   
   #Output fgsea top barplot
   output$fgsea_bars <- renderPlot({
