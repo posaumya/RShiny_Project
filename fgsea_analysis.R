@@ -31,7 +31,10 @@ run_fgsea <- function(gmt_file_path, rnk_list, min_size, max_size) {
   return(as_tibble(fgsea_results))
 }
 
-fgsea_result <- run_fgsea(gene_set_file,rnk_list,15,300)
+fgsea_result <- run_fgsea(gene_set_file,rnk_list,15,1115)
+# Convert list column to character
+fgsea_result$leadingEdge <- sapply(fgsea_result$leadingEdge, paste, collapse = ", ")
+
 print(head(fgsea_result))
 
-write.csv(fgsea_df, "data/fgsea_results.csv", row.names = FALSE)
+write.csv(fgsea_result, "data/fgsea_results.csv", row.names = FALSE)

@@ -116,7 +116,7 @@ ui <- fluidPage(
                sidebarPanel(width = 3,
                             tags$head(
                             tags$style(".btn-file {background-color:#829CD0;}.progress-bar{color:black;background-color:#A39E9E;}")),
-                            fileInput(inputId = "sample_file", label = paste0("Load Metadata File"), accept = c(".csv")),
+                            fileInput(inputId = "sample_file",label = HTML(paste0( icon("upload"),"  Upload Metadata File ")),accept = c(".csv")),
                             class="sidebar-border"
                ),
                
@@ -159,7 +159,7 @@ ui <- fluidPage(
                              tags$head(
                                tags$style(".btn-file {background-color:#829CD0;}.progress-bar{color:black;background-color:#A39E9E;}")),
                              #input count matrix
-                             fileInput(inputId = "count_file", label = "Upload Counts Data", accept = ".csv"),
+                             fileInput(inputId = "count_file", label = HTML(paste0( icon("upload"),"  Upload Counts Data ")), accept = ".csv"),
                              # Add slider inputs
                              tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: #829CD0; color: black}")),
                              sliderInput(inputId = "slid_var",label = "Choose gene percentile of variance", min = 0, max = 100, value = 65, step = 1),
@@ -206,7 +206,7 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(width = 3,
                             #input count matrix
-                            fileInput(inputId = "deseq_file", label = "Upload DE File", accept = ".csv"),
+                            fileInput(inputId = "deseq_file", label = HTML(paste0( icon("upload"),"  Upload DE File ")), accept = ".csv"),
                             class="sidebar-border"
                ),
                # Show a plot of the generated distribution
@@ -252,16 +252,22 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(width = 3,
                             #input count matrix
-                            fileInput(inputId = "fgsea_file", label = "Load a CSV file", accept = ".csv")
+                            fileInput(inputId = "fgsea_file", label = HTML(paste0( icon("upload"),"  Upload FGSEA Results ")), accept = ".csv"),
+                            class="sidebar-border"
                ),
                # Show a plot of the generated distribution
                mainPanel(
                  tabsetPanel(
-                   tabPanel(title = "Pathway Barplot",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Barplot")),
                             sidebarLayout(
                               sidebarPanel( width = 3,
-                                            sliderInput(inputId = "pth_threshold",label = "Top results by padj value smaller than 10^(X)", min = -48, max = 0, value = -20, step = 1),
-                                            submitButton(text = "Submit",icon = icon("bars"))
+                                            tags$style(HTML(".js-irs-4 .irs-single, .js-irs-4 .irs-bar-edge, .js-irs-4 .irs-bar {background: #829CD0; color: black}")),
+                                            sliderInput(inputId = "pth_threshold",label = "Choose Padj threshold", min = -15, max = 0, value = -9, step = 1),
+                                            div(
+                                              submitButton(text = "Plot", icon = icon("chart-bar")),
+                                              style = "width: 100%; text-align: center;"  
+                                            ),
+                                            class="sidebar-border"
                               ),
                               # Show a plot of the fgsea bars of top results
                               mainPanel( 
@@ -269,25 +275,38 @@ ui <- fluidPage(
                               )
                             )
                    ),
-                   tabPanel(title = "Pathway Table",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Table")),
                             sidebarLayout(
                               sidebarPanel(width = 3,
-                                           sliderInput(inputId = "path_slid",label = "Filtered table by padj value", min = -48, max = 0, value = -20, step = 1),
-                                           radioButtons(inputId = "all_path", label = "Select pathways",choices = c("All","Postive","Negative"), selected = NULL),
-                                           submitButton(text = "Submit",icon = icon("filter")),
-                                           downloadButton(outputId = "download_fgsea_table", label = "Download")
+                                           tags$style(HTML(".js-irs-5 .irs-single, .js-irs-5 .irs-bar-edge, .js-irs-5 .irs-bar {background: #829CD0; color: black}")),
+                                           sliderInput(inputId = "path_slid",label = "Choose Padj threshold", min = -15, max = 0, value = -9, step = 1),
+                                           radioButtons(inputId = "all_path", label = "Choose pathways to display",choices = c("Postive","Negative","All"), selected = NULL),
+                                           div(
+                                             submitButton(text = "Filter", icon = icon("filter")),
+                                             style = "width: 100%; text-align: center;"  
+                                           ),
+                                           div(
+                                             downloadButton(outputId = "download_fgsea_table", label = "Download"),
+                                             style = "width: 100%; text-align: center;margin-top:10px;"  
+                                           ),
+                                           class="sidebar-border"
                               ),
                               # Show a plot of the fgsea bars of top results
                               mainPanel(
-                                div(DT::dataTableOutput("fgsea_filt_table"), style = "font-size:80%; width: 30%;")
+                                div(DT::dataTableOutput("fgsea_filt_table"), style = "font-size:80%; width: 130%;")
                               )
                             )
                    ),
-                   tabPanel(title = "Pathway Scatter Plot",
+                   tabPanel(title = tags$span(class = "tab-border",tags$strong("Scatter Plot")),
                             sidebarLayout(
                               sidebarPanel(width = 3,
-                                           sliderInput(inputId = "scatter_slid",label = "filter the plot by padj value", min = -48, max = 0, value = -20, step = 1),
-                                           submitButton(text = "Submit",icon = icon("refresh"))
+                                           tags$style(HTML(".js-irs-6 .irs-single, .js-irs-6 .irs-bar-edge, .js-irs-6 .irs-bar {background: #829CD0; color: black}")),
+                                           sliderInput(inputId = "scatter_slid",label = "Choose Padj threshold", min = -15, max = 0, value = -7, step = 1),
+                                           div(
+                                             submitButton(text = "Plot", icon = icon("chart-area")),
+                                             style = "width: 100%; text-align: center;"  
+                                           ),
+                                           class="sidebar-border"
                               ),
                               # Show a plot of the fgsea bars of top results
                               mainPanel( 
@@ -302,7 +321,7 @@ ui <- fluidPage(
   )
  ),
  div(class="credit-text",
- h5(class = "underlined-text","Credit:"),
+ h5(class = "underlined-text",strong("Credit:")),
  p(tags$a(
    href = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4670106/",
    "Labadorf A, Hoss AG, Lagomarsino V, Latourelle JC et al. RNA Sequence Analysis of Human Huntington Disease Brain Reveals an Extensive Increase in Inflammatory and Developmental Gene Expression. PLoS One 2015;10(12):e0143563. PMID: 26636579"
@@ -572,11 +591,11 @@ server <- function(input, output, session) {
     NES_barplot <- dplyr::bind_rows(top_positive_nes, top_negative_nes)%>%
       ggplot() +
       geom_col(aes(x=reorder(pathway,+NES), y=NES, fill = NES > 0))+
-      scale_fill_manual(values =c('TRUE' = 'red', 'FALSE' = 'blue')) +
+      scale_fill_manual(values =c('TRUE' = '#BA1AE5', 'FALSE' = '#60BD56')) +
       theme_minimal() +
       coord_flip()+
       theme(legend.position = "none", axis.text.y = element_text( hjust =1 ,size= 7),axis.title.x = element_text(size = 10))+ 
-      labs(title="fgsea results for C2 curated gene sets", x= "",y= "Normalized Enrichment Score (NES)")
+      labs(title="FGSEA Results for Human MSig C3 TFT Gene Set", x= "",y= "Normalized Enrichment Score (NES)")
     return(NES_barplot)
   }
   
@@ -747,27 +766,10 @@ server <- function(input, output, session) {
       filtered_df <- filtered_df %>%
         dplyr::mutate(pval = formatC(ifelse(is.na(pval), 0, pval), format = "e"),
                       padj = formatC(ifelse(is.na(padj), 0, padj), format = "e"))
-      return(DT::datatable(filtered_df))
+      return(DT::datatable(filtered_df, options = list(ordering = TRUE, scrollX = TRUE)))
     })
   })
   
-  observeEvent(input$all_path, {
-    output$fgsea_filt_table <- DT::renderDataTable({
-      filter_df <- fgsea_data()
-      filtered_df <- dplyr::filter(filter_df, padj < 10^(input$path_slid))
-      if (input$all_path == "All") {
-        filtered_df <- filtered_df
-      } else if (input$all_path == "Positive") {
-        filtered_df <- dplyr::filter(filtered_df, NES > 0)
-      } else if (input$all_path == "Negative") {
-        filtered_df <- dplyr::filter(filtered_df, NES < 0)
-      }
-      filtered_df <- filtered_df %>%
-        dplyr::mutate(pval = formatC(ifelse(is.na(pval), 0, pval), format = "e"),
-                      padj = formatC(ifelse(is.na(padj), 0, padj), format = "e"))
-      return(DT::datatable(filtered_df))
-    })
-  })
   
   #Output fgsea filter scatter plot
   output$NES_scatter <- renderPlot({
@@ -777,11 +779,11 @@ server <- function(input, output, session) {
       dplyr::mutate(status = dplyr::case_when(padj < 10^(slider) ~ "TRUE",
                                               padj >= 10^(slider) ~ "FALSE"))
     # specify color based on the slider value
-    df$colors <- ifelse(df$status == "FALSE", "orange", "grey")
+    df$colors <- ifelse(df$status == "FALSE", "purple", "grey")
     # plotting scatter plot
     scatter <- ggplot(df, aes(x = NES, y = new_padj, color = colors)) +
       geom_point(size = 1) +
-      scale_color_manual(values = c("orange","grey"),
+      scale_color_manual(values = c("purple","grey"),
                          labels = c("TRUE", "FALSE")) +
       labs(x = "NES", y = "-log10(padj)",color = paste0( "padj < 10^",slider )) +
       theme_bw()+
