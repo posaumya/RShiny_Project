@@ -12,6 +12,9 @@ library(ggbeeswarm)
 
 
 ui <- fluidPage(
+  
+#--Background colour of the page----------------------------------------------------------------------------------------
+  
   tags$head(
     tags$style(
       HTML(
@@ -23,6 +26,9 @@ ui <- fluidPage(
       )
     )
   ),  
+  
+#--Theme for all boxed texts----------------------------------------------------------------------------------------------
+  
   tags$head(
     tags$style(HTML("
       /* Define a custom class for text with a colored box */
@@ -36,6 +42,9 @@ ui <- fluidPage(
       }
     "))
   ),
+  
+#--Theme for title text----------------------------------------------------------------------------------------------------
+  
   tags$head(
     tags$style(HTML("
       /* Define a custom class for text with a colored box */
@@ -53,6 +62,8 @@ ui <- fluidPage(
       }
     "))
   ),
+
+#--Theme for underline text---------------------------------------------------------------------------------------------
   tags$head(
     tags$style(HTML("
       /* Define a custom class for underlined text */
@@ -61,6 +72,8 @@ ui <- fluidPage(
       }
     "))
   ),
+
+#--Theme for sidebars-----------------------------------------------------------------------------------------------------
   tags$style(
     HTML(
       "
@@ -73,6 +86,8 @@ ui <- fluidPage(
       "
     )
   ),
+
+#--Theme for tabs-----------------------------------------------------------------------------------------------------------
   tags$style(
     HTML(
       "
@@ -88,6 +103,8 @@ ui <- fluidPage(
       "
     )
   ),
+
+#--Theme for credit box-------------------------------------------------------------------------------------------------------
   tags$head(
     tags$style(HTML("
       /* Define a custom class for text with a colored box */
@@ -102,12 +119,16 @@ ui <- fluidPage(
       }
     "))
   ),
+
+#--Title text-------------------------------------------------------------------------------------------------------------------
   div(class = "title-text",
   titlePanel(strong("BF591 Final Project")),
   ),
   div(class = "boxed-text",
   h4(strong("Analysis of Post-Mortem Huntington’s Disease Data")),
   ),
+
+#--Main Panel--------------------------------------------------------------------------------------------------------------------
   div(
     style = "border: 2px solid #000000; border-radius: 5px;background-color: #F5F5F5;",
   tabsetPanel(
@@ -120,7 +141,7 @@ ui <- fluidPage(
                             class="sidebar-border"
                ),
                
-               # Show a plot of the generated distribution
+               #Show a plot of the generated distribution
                mainPanel(
                  
                  tabsetPanel(
@@ -153,6 +174,8 @@ ui <- fluidPage(
              )
     ),  
     
+#--Counts Matrix tab----------------------------------------------------------------------------------------------------------------------------------------
+
     tabPanel(title = tags$span(class = "tab-border",tags$strong("Counts Matrix")),
              sidebarLayout(
                sidebarPanel( width = 3,
@@ -202,6 +225,9 @@ ui <- fluidPage(
                )
              )
     ),
+
+#--DE tab---------------------------------------------------------------------------------------------------------------------------------------------------
+
     tabPanel(title = tags$span(class = "tab-border",tags$strong("Differential Expression")),
              sidebarLayout(
                sidebarPanel(width = 3,
@@ -220,8 +246,8 @@ ui <- fluidPage(
                                          radioButtons(inputId = "x_axis", label = "Choose X-axis variable", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "log2FoldChange"), #NULL ),
                                          radioButtons(inputId = "y_axis", label = "Choose Y-axis variable", choices = c("baseMean","log2FoldChange","lfcSE","stat","pvalue","padj"), selected = "padj"),#NULL),
                                          # Add color inputs
-                                         colourInput(inputId = "base", label = "Choose color 1", value = "#60BD56"),
-                                         colourInput(inputId = "highlight", label = "Choose color 2", value = "#BA1AE5"),
+                                         colourInput(inputId = "base", label = "Choose base colour", value = "#60BD56"),
+                                         colourInput(inputId = "highlight", label = "Choose highlight colour", value = "#BA1AE5"),
                                          # Add slider inputs
                                          tags$style(HTML(".js-irs-3 .irs-single, .js-irs-3 .irs-bar-edge, .js-irs-3 .irs-bar {background: #829CD0; color: black}")),
                                          sliderInput(inputId = "padj_slider",label = "Choose a padj value as threshold", min = -35, max = 0, value = -5, step = 1),
@@ -247,6 +273,8 @@ ui <- fluidPage(
                )
              )
     ),
+
+#--GSEA tab---------------------------------------------------------------------------------------------------------------------------------------------
     tabPanel(title = tags$span(class = "tab-border",tags$strong("GSEA")),
              # Use DGE results to compute gene set enrichment analysis with fgsea
              sidebarLayout(
@@ -320,6 +348,8 @@ ui <- fluidPage(
     )
   )
  ),
+
+#--Credit text------------------------------------------------------------------------------------------------------------------------------------------------
  div(class="credit-text",
  h5(class = "underlined-text",strong("Credit:")),
  p(tags$a(
@@ -337,9 +367,12 @@ ui <- fluidPage(
  )
 )
 
-# Define server logic required to draw a violin plot
+# Define server 
 server <- function(input, output, session) {
   options(shiny.maxRequestSize = 30*1024^2) # set max file size to 30 MB
+
+#--1st tab sample info---------------------------------------------------------------------------------------------------------------------------------------------    
+  
   #Read in sample data
   sample_data <- reactive({
     req(input$sample_file)
@@ -363,6 +396,8 @@ server <- function(input, output, session) {
     rownames(data_info) <- NULL
     data_info <-mutate(data_info,across(c(4,8:11), as.double))
   })
+
+#--1st tab metadata table---------------------------------------------------------------------------------------------------------------------------------------  
   
   summary_tablef <- function(data) {
     # Count number of rows and columns
@@ -389,7 +424,9 @@ server <- function(input, output, session) {
     }
     return(col_info%>%as_tibble())
   }
-  
+
+#--1st tab violin plot---------------------------------------------------------------------------------------------------------------------------------------    
+ 
   #Generate violin plot of sample
   violin <- function(df, x_var, y_var) {
     ggplot(df, aes(x = .data[[x_var]], y = .data[[y_var]], fill = .data[[x_var]])) +
@@ -399,6 +436,8 @@ server <- function(input, output, session) {
       theme_minimal()
   }
   
+#--2nd tab counts input data--------------------------------------------------------------------------------------------------------------------------------  
+ 
   #Read in count data
   count_data <- reactive({
     req(input$count_file)
@@ -406,6 +445,8 @@ server <- function(input, output, session) {
       as_tibble()%>%dplyr::rename(gene = X)
     return(data)
   })
+  
+#--2nd tab filtered table-------------------------------------------------------------------------------------------------------------------------------------
   
   #Count data filtering table
   filter_table <- function(data, pass_filter1, pass_filter2) {
@@ -428,22 +469,29 @@ server <- function(input, output, session) {
     )
     return(col_info)
   }
+
+#--2nd tab scatterplots--------------------------------------------------------------------------------------------------------------------------------------
   
-  plot_variance_vs_median <- function(data, pass_filter1, scale_y_axis=FALSE) {
+  plot_variance_vs_median <- function(data, pass_filter1, scale_y_axis = FALSE) {
     new_tib <- tibble(count_median = apply(data[,-1], 1, median)) %>%
       add_column(variance = apply(data[,-1], 1, var), rank = rank(.))
-    #Count the percentile variance
-    xPercentile <- quantile(new_tib$variance, pass_filter1/100)
-    new_tib <- new_tib%>%  
-      mutate(determine = ifelse(variance >= xPercentile, "Pass", "Fail")) %>%
-      ggplot(aes(x= rank, y= variance, color=determine)) +
-      geom_point(shape = 21, color = "black", size=2, aes(fill = determine)) +
-      scale_color_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
-      scale_fill_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
+    
+    # Compute log of variance
+    new_tib$log_variance <- log10(new_tib$variance)
+    
+    # Count the percentile variance
+    xPercentile <- quantile(new_tib$log_variance, pass_filter1 / 100)
+    
+    new_tib <- new_tib %>%  
+      mutate(determine = ifelse(log_variance >= xPercentile, "Pass", "Fail")) %>%
+      ggplot(aes(x = rank, y = log_variance, color = determine)) +
+      geom_point(shape = 21, color = "black", size = 2, aes(fill = determine)) +
+      scale_color_manual(name = "Filtered Genes", values = c("Fail" = "grey", "Pass" = "purple")) +
+      scale_fill_manual(name = "Filtered Genes", values = c("Fail" = "grey", "Pass" = "purple")) +
       geom_smooth() +
-      theme_classic()+
-      labs(title= "Median Count vs Variance", x="Ranked Median", y = "Variance", color="Filter") +
-      scale_y_log10()
+      theme_classic() +
+      labs(title = "Ranked Median vs Log Variance", x = "Ranked Median", y = "Log Variance", color = "Filtered Genes") 
+    
     return(new_tib)
   }
   
@@ -454,13 +502,15 @@ server <- function(input, output, session) {
              num_zeros = ncol(data)-non_zeros) %>%
       ggplot(aes(x= rank, y= num_zeros, color=determine)) +
       geom_point(shape = 21, color = "black", size=2, aes(fill = determine)) +
-      scale_color_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
-      scale_fill_manual(name = "Filter", values = c("Fail" = "grey", "Pass" = "purple")) +
+      scale_color_manual(name = "Filtered Genes", values = c("Fail" = "grey", "Pass" = "purple")) +
+      scale_fill_manual(name = "Filtered Genes", values = c("Fail" = "grey", "Pass" = "purple")) +
       geom_smooth() +
       theme_classic()+
-      labs(title= "Median Count vs Number of Zeros", x="Ranked Median", y = "Number of Zeros", color="Filter")
+      labs(title= "Ranked Median vs Number of Zeros", x="Ranked Median", y = "Number of Zeros", color="Filtered Genes")
     return(new_tib)
   }
+  
+#--2nd tab heatmap------------------------------------------------------------------------------------------------------------------------------------------
   
   #generate filter matrix for heatmap
   filter_res <- function(data, pass_filter1, pass_filter2) {
@@ -480,6 +530,9 @@ server <- function(input, output, session) {
     num_matrix[!is.finite(num_matrix)] <- NA
     heatmap.2(num_matrix, col = coul, trace = "none",xlab = "Samples", ylab = "Genes",margins = c(5, 8),key = TRUE, key.title = "Expression level", key.xlab = "Expression", key.ylab = NULL)
   }
+  
+#--2nd tab PCA beeswarmplot----------------------------------------------------------------------------------------------------------------------------------------------
+  
   #generate PCA beeswarmplot
   plot_beeswarm <- function(data, N) {
     pca_results <- prcomp(scale(t(data[,-1]%>%as.data.frame())), center=FALSE, scale=FALSE)
@@ -508,6 +561,9 @@ server <- function(input, output, session) {
       labs(x = "Principal Components", y = "Values")
     beeswarm_plot
   }
+  
+#--3rd tab DE input data------------------------------------------------------------------------------------------------------------------------------------
+  
   #Read in DESeq data
   deseq_data <- reactive({
     req(input$deseq_file)
@@ -515,6 +571,9 @@ server <- function(input, output, session) {
       as_tibble()%>%dplyr::rename(gene= X)
     return(data)
   })
+  
+  
+#--3rd tab volcano plot and filt table--------------------------------------------------------------------------------------------------------------------------------------
   
   #Generate Volcano plot 
   volcano_plot <- function(dataf, x_axis, y_axis, slider, base, highlight) {
@@ -556,6 +615,9 @@ server <- function(input, output, session) {
     # Return the filtered data
     return(filtered_data)
   }
+  
+#--4th tab fgsea input data-----------------------------------------------------------------------------------------------------------------------------------
+  
   #Read in fgsea data
   fgsea_data <- reactive({
     req(input$fgsea_file)
@@ -563,6 +625,8 @@ server <- function(input, output, session) {
       as_tibble()
     return(data)
   })
+
+#--4th tab filter table-------------------------------------------------------------------------------------------------------------------------------------
   
   #Generate the filter pathway tables in fgsea
   gsea_table <- reactive({
@@ -581,6 +645,7 @@ server <- function(input, output, session) {
     return(filtered_df)
   })
   
+#--4th tab barplot--------------------------------------------------------------------------------------------------------------------------------------------
   
   #Generate barplot for top pathways of fgsea
   fgsea_top_pathways <- function(fgsea_results, threshold){
@@ -595,9 +660,11 @@ server <- function(input, output, session) {
       theme_minimal() +
       coord_flip()+
       theme(legend.position = "none", axis.text.y = element_text( hjust =1 ,size= 7),axis.title.x = element_text(size = 10))+ 
-      labs(title="FGSEA Results for Human MSig C3 TFT Gene Set", x= "",y= "Normalized Enrichment Score (NES)")
+      labs(title="FGSEA Results for Human MSig C3 TFT Gene Set", x= "",y= "Normalised Enrichment Score (NES)")
     return(NES_barplot)
   }
+
+#--Out 1st summary table-------------------------------------------------------------------------------------------------------------------------------------
   
   #generate sample summary table
   output$sample_summary <- DT::renderDataTable({
@@ -619,6 +686,9 @@ server <- function(input, output, session) {
       )
     )
   })
+  
+#--Out 1st tab metadata-------------------------------------------------------------------------------------------------------------------------------------------
+  
   #Generate sample file as table
   output$sample_table <- DT::renderDataTable({
     dataf <- sample_data()
@@ -633,6 +703,8 @@ server <- function(input, output, session) {
     ordering = TRUE,
     scrollX = TRUE  # Enable horizontal scrolling
   ))
+
+#--Out 1st violin plot----------------------------------------------------------------------------------------------------------------------------------------
   
   #output sample violin plot
   output$sample_plot <- renderPlot({
@@ -642,6 +714,8 @@ server <- function(input, output, session) {
     violin_plot <-violin(dataf, input$sample_x,input$sample_y)
     violin_plot
   })
+  
+#--Out 2nd tab filt table------------------------------------------------------------------------------------------------------------------------------------------
   
   #output count filter table
   output$filter_count <- renderTable({
@@ -657,6 +731,8 @@ server <- function(input, output, session) {
     trans_result
   }) 
   
+#--Out 2nd tab scatterplot----------------------------------------------------------------------------------------------------------------------------------------
+  
   #output count scatter plot
   output$count_scatter <- renderPlot({
     dataf <- count_data()
@@ -668,6 +744,8 @@ server <- function(input, output, session) {
     grid.arrange(plot1, plot2, nrow=2)
   }) 
   
+#--Out 2nd tab heatmap-----------------------------------------------------------------------------------------------------------------------------------------------
+  
   #Output filtering count heatmap
   output$clus_heatmap <- renderPlot({
     dataf <- count_data()
@@ -677,6 +755,8 @@ server <- function(input, output, session) {
     plot_heatmap(num_matrix)
   })
   
+#--Out 2nd tab PCA beeswarmplot-----------------------------------------------------------------------------------------------------------------------------------
+  
   #Output count PCA beeswarmplot
   output$pca_plot <- renderPlot({
     dataf <- count_data()
@@ -685,6 +765,8 @@ server <- function(input, output, session) {
     beeswarm_plot <- plot_beeswarm(dataf,input$top_PC)
     beeswarm_plot
   }) 
+  
+#--Out 3rd tab DE table-----------------------------------------------------------------------------------------------------------------------------------------
   
   #output DESeq summary table
   output$DE_summary <- DT::renderDataTable({
@@ -703,6 +785,8 @@ server <- function(input, output, session) {
     return(draw_table(dataf, input$padj_slider))
   })
   
+#--Out 3rd tab volcano plot------------------------------------------------------------------------------------------------------------------------------------  
+  
   #output DE volcano plot
   output$volcano <- renderPlot({
     input$padj_slider
@@ -717,6 +801,8 @@ server <- function(input, output, session) {
       )
     })
   }) 
+  
+#Out 3rd tab filt table------------------------------------------------------------------------------------------------------------------------------------------
   
   # output the padj filtered table in DE tab
   output$volcano_table <- DT::renderDataTable({
@@ -733,7 +819,9 @@ server <- function(input, output, session) {
                     scrollX = TRUE  # Enable horizontal scrolling)
   )) 
   
-  #Output fgsea top barplot
+#--Out 4th tab fgsea bar plot-----------------------------------------------------------------------------------------------------------------------------------------
+  
+  #Output fgsea barplot
   output$fgsea_bars <- renderPlot({
     dataf <- fgsea_data()
     if(is.null(dataf))
@@ -741,17 +829,22 @@ server <- function(input, output, session) {
     bar_plot <- fgsea_top_pathways(dataf,input$pth_threshold)
     bar_plot
   }) 
+
+#--Out 4th tab download button-------------------------------------------------------------------------------------------------------------------------------
   
   #Output download fgsea table
   output$download_fgsea_table <- downloadHandler(
     filename = function() {
-      paste("fgsea_table", Sys.Date(), ".csv", sep="")
+      paste("filt_fgsea_table", ".csv", sep="")
     },
     content = function(file) {
       write.csv(gsea_table(), file, row.names = FALSE)
     }
   )
   
+#--Out 4th tab fgsea filt table--------------------------------------------------------------------------------------------------------------------------------
+  
+  #Output fgsea table
   observeEvent(input$path_slid, {
     output$fgsea_filt_table <- DT::renderDataTable({
       filter_df <- fgsea_data()
@@ -766,12 +859,19 @@ server <- function(input, output, session) {
       filtered_df <- filtered_df %>%
         dplyr::mutate(pval = formatC(ifelse(is.na(pval), 0, pval), format = "e"),
                       padj = formatC(ifelse(is.na(padj), 0, padj), format = "e"))
-      return(DT::datatable(filtered_df, options = list(ordering = TRUE, scrollX = TRUE)))
+      return(DT::datatable(filtered_df, 
+                           options = list(ordering = TRUE, scrollX = TRUE,
+                           columnDefs = list(
+                             list(width = '200%', targets = 8),  # Adjust the width of the last column
+                             list(width = '50%', targets = c(0, 1, 2, 3, 4, 5, 6, 7))  # Adjust the width of other columns
+                           ))))
     })
   })
   
+
+#--Out 4th tab fgsea scatterplot--------------------------------------------------------------------------------------------------------------------------------------
   
-  #Output fgsea filter scatter plot
+  #Output fgsea scatter plot
   output$NES_scatter <- renderPlot({
     dataf <- fgsea_data()
     slider<-input$scatter_slid
