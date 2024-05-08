@@ -1,4 +1,5 @@
 # Final Project for BF591 (R for Biological Sciences)
+RShiny app developed to display and navigate differential expression data.
 
 ## Project Overview
 The RShiny app was developed as part of the final project and the aim was to allow exploration a differential expression dataset comparing post-mortem Huntington’s Disease Brain data. The data for this is publically available through [GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64810). The paper used for reference is also [publically available](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4670106/). The theme and design for the app is entirely done using CSS and not by utilising in-built RShiny theme libraries.
